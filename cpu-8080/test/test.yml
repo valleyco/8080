@@ -1,0 +1,771 @@
+---
+- name: test mov
+  reset: false
+  state:
+    registers:
+      a: 0
+      b: 5
+      c: 0
+      d: 0
+      e: 0
+      h: 0
+      l: 0
+    memory:
+      - location: 100
+        data: [0, 0, 0, 0]
+  code:
+    - mov b,b
+    - mov c,b
+    - mov d,b
+    - mov e,b
+    - mov h,b
+    - mov l,b
+    - mov a,b
+    - mov m,b
+  expected:
+    registers:
+      a: 5
+      b: 5
+      c: 5
+      d: 5
+      e: 5
+      h: 5
+      l: 5
+    memory:
+      - location: 1285
+        data: [5]
+- name: test mov
+  state:
+    memory:
+      - location: 100
+        data: [199, 0, 0, 0]
+  code:
+    - mvi l,100
+    - mvi h,0
+    - mov a,m
+  expected:
+    registers:
+      a: 199
+- name: test mvi
+  code:
+    - mvi b,1
+    - mvi c,2
+    - mvi d,3
+    - mvi e,4
+    - mvi h,5
+    - mvi l,6
+    - mvi m,7
+    - mvi a,8
+  expected:
+    registers:
+      a: 8
+      b: 1
+      c: 2
+      d: 3
+      e: 4
+      h: 5
+      l: 6
+    memory:
+      - location: 1286
+        data: [7]
+- name: test lxi
+  code:
+    - lxi bc, 258
+    - lxi de, 772
+    - lxi hl, 1286
+    - lxi sp, 1800
+  expected:
+    registers:
+      b: 1
+      c: 2
+      d: 3
+      e: 4
+      h: 5
+      l: 6
+      sp: 1800
+- name: test lda
+  state:
+    memory:
+      - location: 100
+        data: [20]
+  code:
+    - lda 100
+  expected:
+    registers:
+      a: 20
+- name: test sta
+  code:
+    - mvi a, 25
+    - sta 100
+  expected:
+    memory:
+      - location: 100
+        data: [25]
+- name: test lhld
+  state:
+    memory:
+      - location: 100
+        data: [0, 1]
+      - location: 0x100
+        data: [1, 2]
+  code:
+    - lhld 100
+  expected:
+    registers:
+      l: 0
+      h: 1
+
+- name: test shld
+  state:
+    memory:
+      - location: 100
+        data: [0, 1]
+  code:
+    - lxi hl,513
+    - shld 100
+  expected:
+    memory:
+      - location: 100
+        data: [1, 2]
+- name: test ldax bc
+  state:
+    memory:
+      - location: 100
+        data: [25, 1]
+  code:
+    - lxi bc, 100
+    - ldax bc
+  expected:
+    registers:
+      a: 25
+- name: test ldax de
+  state:
+    memory:
+      - location: 100
+        data: [25, 1]
+  code:
+    - lxi de, 100
+    - ldax de
+  expected:
+    registers:
+      a: 25
+- name: test stax bc
+  state:
+    memory:
+      - location: 100
+        data: [0, 2]
+  code:
+    - mvi a, 23
+    - lxi bc, 100
+    - stax bc
+  expected:
+    memory:
+      - location: 100
+        data: [23, 2]
+- name: test stax de
+  state:
+    memory:
+      - location: 100
+        data: [0, 2]
+  code:
+    - mvi a, 25
+    - lxi de, 100
+    - stax de
+  expected:
+    memory:
+      - location: 100
+        data: [25, 2]
+- name: test xchg
+  state:
+    registers:
+      d: 1
+      e: 2
+      h: 3
+      l: 4
+  code:
+    - xchg
+  expected:
+    registers:
+      d: 3
+      e: 4
+      h: 1
+      l: 2
+- name: test add minus
+  code:
+    - mvi a,5
+    - mvi b,128
+    - add b
+  expected:
+    registers:
+      a: 133
+    flags:
+      z: 0
+      s: 1
+      c: 0
+      p: 0
+      a: 0
+
+- name: test add and cary
+  code:
+    - mvi a,5
+    - mvi b,255
+    - add b
+  expected:
+    registers:
+      a: 4
+    flags:
+      z: 0
+      s: 0
+      c: 1
+      p: 0
+      a: 1
+- name: test add and zero
+  code:
+    - mvi a,1
+    - mvi b,255
+    - add b
+  expected:
+    registers:
+      a: 0
+    flags:
+      z: 1
+      s: 0
+      c: 1
+      p: 1
+      a: 1
+- name: test adi
+  code:
+    - mvi a,0
+    - adi 15
+  expected:
+    registers:
+      a: 15
+    flags:
+      z: 0
+      s: 0
+      c: 0
+      p: 1
+      a: 0
+- name: test adi carry flag
+  code:
+    - mvi a,255
+    - adi 1
+  expected:
+    registers:
+      a: 0
+    flags:
+      z: 1
+      s: 0
+      c: 1
+      p: 1
+      a: 1
+- name: test adi carry flag and non zero
+  code:
+    - mvi a,255
+    - adi 2
+  expected:
+    registers:
+      a: 1
+    flags:
+      z: 0
+      s: 0
+      c: 1
+      p: 0
+      a: 1
+- name: test adc with carry flag
+  state:
+    flags:
+      c: 1
+      z: 0
+  code:
+    - mvi a,0
+    - mvi b,1
+    - adc b
+  expected:
+    registers:
+      a: 2
+    flags:
+      z: 0
+      s: 0
+      c: 0
+      p: 0
+      a: 0
+- name: test adc with carry flag off
+  state:
+    flags:
+      c: 0
+      z: 0
+  code:
+    - mvi a,0
+    - aci 3
+  expected:
+    registers:
+      a: 3
+    flags:
+      z: 0
+      s: 0
+      c: 0
+      p: 1
+      a: 0
+- name: test sub
+  code:
+    - mvi a,1
+    - mvi b,255
+    - sub b
+  expected:
+    registers:
+      a: 2
+    flags:
+      z: 0
+      s: 0
+      c: 1
+      p: 0
+- name: test sui
+  code:
+    - mvi a,1
+    - sui 255
+  expected:
+    registers:
+      a: 2
+    flags:
+      z: 0
+      s: 0
+      c: 1
+      p: 0
+- name: test sui
+  state:
+    flags:
+      c: 0
+  code:
+    - mvi a,1
+    - sui 255
+  expected:
+    registers:
+      a: 2
+    flags:
+      z: 0
+      s: 0
+      c: 1
+      p: 0
+- name: test sbi
+  state:
+    flags:
+      c: 1
+  code:
+    - mvi a,1
+    - sbi 255
+  expected:
+    registers:
+      a: 1
+    flags:
+      z: 0
+      s: 0
+      c: 1
+      p: 0
+- name: test inr
+  code:
+    - mvi a, 1
+    - inr a
+  expected:
+    registers:
+      a: 2
+    flags:
+      z: 0
+      s: 0
+      p: 0
+      a: 0
+- name: test inr with ac flags
+  code:
+    - mvi a, 15
+    - inr a
+  expected:
+    registers:
+      a: 16
+    flags:
+      z: 0
+      s: 0
+      p: 0
+      a: 1
+- name: test inr with s flags
+  code:
+    - mvi a, 127
+    - inr a
+  expected:
+    registers:
+      a: 128
+    flags:
+      z: 0
+      s: 1
+      p: 0
+      a: 1
+- name: test inr memory
+  state:
+    registers:
+      h: 0
+      l: 100
+
+    memory:
+      - location: 100
+        data: [6]
+  code:
+    - lxi hl,100
+    - inr m
+  expected:
+    registers:
+      h: 0
+      l: 100
+    memory:
+      - location: 100
+        data: [7]
+    flags:
+      z: 0
+      s: 0
+      p: 0
+- name: test dec with ac flags
+  code:
+    - mvi a, 16
+    - dcr a
+  expected:
+    registers:
+      a: 15
+    flags:
+      z: 0
+      s: 0
+      p: 1
+      a: 1
+- name: test inx
+  state:
+    registers:
+      b: 1
+      c: 255
+  code:
+    - inx bc
+  expected:
+    registers:
+      b: 2
+      c: 0
+- name: test dcx
+  state:
+    registers:
+      b: 2
+      c: 0
+  code:
+    - dcx bc
+  expected:
+    registers:
+      b: 1
+      c: 255
+- name: test DAD
+  code:
+    - lxi bc, 33025
+    - lxi hl, 33025
+    - dad bc
+  expected:
+    registers:
+      h: 2
+      l: 2
+    flags:
+      c: 1
+- name: test push pop
+  state:
+    registers:
+      sp: 100
+  code:
+    - mvi a,1
+    - mvi b,2
+    - mvi c,3
+    - mvi d,4
+    - mvi e,5
+    - mvi h,6
+    - mvi l,7
+    - push hl
+    - push de
+    - push bc
+    - pop hl
+    - pop bc
+    - pop de
+  expected:
+    registers:
+      b: 4
+      c: 5
+      d: 6
+      e: 7
+      h: 2
+      l: 3
+- name: test RLC
+  code:
+    - mvi a,128
+    - rlc
+  expected:
+    registers:
+      a: 1
+    flags:
+      c: 1
+- name: test RRC
+  code:
+    - mvi a,3
+    - rrc
+  expected:
+    registers:
+      a: 129
+    flags:
+      c: 1
+- name: test RAL
+  code:
+    - xra a
+    - mvi a,128
+    - ral
+  expected:
+    registers:
+      a: 0
+    flags:
+      c: 1
+- name: test RAL
+  code:
+    - stc
+    - mvi a,128
+    - ral
+  expected:
+    registers:
+      a: 1
+    flags:
+      c: 1
+- name: test RAR
+  code:
+    - stc
+    - mvi a,1
+    - rar
+  expected:
+    registers:
+      a: 128
+    flags:
+      c: 1
+- name: test jc
+  code:
+    - stc
+    - jc 7
+    - hlt
+    - nop
+    - nop
+    - hlt
+  expected:
+    registers:
+      pc: 8
+- name: test jz
+  code:
+    - xra a
+    - jnc 7
+    - hlt
+    - nop
+    - nop
+    - hlt
+  expected:
+    registers:
+      pc: 8
+- name: test jz
+  code:
+    - xra a
+    - jz 7
+    - hlt
+    - nop
+    - nop
+    - hlt
+  expected:
+    registers:
+      pc: 8
+- name: test jnz (con not met)
+  code:
+    - xra a
+    - jnz 7
+    - hlt
+    - nop
+    - nop
+    - hlt
+  expected:
+    registers:
+      pc: 5
+- name: test p
+  code:
+    - xra a
+    - jp 7
+    - hlt
+    - nop
+    - nop
+    - hlt
+  expected:
+    registers:
+      pc: 8
+- name: test m
+  code:
+    - mvi a,0
+    - sbi 1
+    - jm 10
+    - hlt
+    - nop
+    - nop
+    - hlt
+  expected:
+    registers:
+      pc: 11
+- name: test CMP
+  code:
+    - mvi a,1
+    - mvi b,2
+    - cmp b
+  expected:
+    flags:
+      c: 1
+      p: 1
+      z: 0
+      s: 1
+- name: test CMP
+  code:
+    - mvi a,2
+    - mvi b,1
+    - cmp b
+  expected:
+    flags:
+      c: 0
+      p: 0
+      z: 0
+      s: 0
+- name: test CMA
+  code:
+    - mvi a,254
+    - cma
+  expected:
+    registers:
+      a: 1
+- name: test call/ret
+  state:
+    registers:
+      sp: 64
+  code:
+    - call 5
+    - hlt
+    - nop
+    - ret
+  expected:
+    registers:
+      pc: 4
+      sp: 64
+    memory:
+      - location: 62
+        data: [3, 0]
+- name: push/pop psw
+  state:
+    registers:
+      a: 4
+      sp: 100
+    flags:
+      c: 1
+      z: 0
+      s: 0
+      p: 0
+  code:
+    - push psw
+    - xra a
+    - pop psw
+  expected:
+    registers:
+      a: 4
+    flags:
+      c: 1
+      z: 0
+      s: 0
+      p: 0
+
+- name: test rst 1
+  state:
+    memory:
+      - location: 0
+        data: [118, 118, 118, 118, 118, 118, 118, 118, 118, 118]
+    registers:
+      sp: 100
+  code:
+    - rst 1
+  expected:
+    registers:
+      pc: 9
+- name: test rst 0
+  state:
+    memory:
+      - location: 0
+        data:
+          [
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+            118,
+          ]
+    registers:
+      sp: 100
+  code:
+    - nop
+    - mvi a,118 # set address 0 to halt instead of nop
+    - sta 0
+    - rst 0
+  expected:
+    registers:
+      pc: 1
+- name:
+  state:
+    registers:
+      a: 1
+      h: 200
+      l: 100
+      sp: 100
+  code:
+    - LXI DE,7680
+    - PUSH HL
+    - MVI H,0
+    - MOV L,A
+    - DAD HL
+    - DAD HL
+    - DAD HL
+    - DAD DE
+    - XCHG
+    - POP HL
+    - MVI B,8
+    - HLT
+  expected:
+    registers:
+      d: 30
+      e: 8
+      h: 200
+      l: 100
+- name: test DAD HL
+  state:
+    registers:
+      h: 0
+      l: 1
+  code:
+    - dad hl
+  expected:
+    registers:
+      l: 2
+- name: test XRA
+  code:
+    - xra a
+    - hlt
+  expected:
+    flags:
+      s: 0
+      z: 1
+      p: 1
+      c: 0  
