@@ -85,7 +85,7 @@ static int audio8_data_len[] = {
 
 #define SOUND_COUNT ((int)sizeof(audio8_data) / (int)sizeof(audio8_data[0]))
 
-static int16_t *audio16_buffer[SOUND_COUNT];
+static uint16_t *audio16_buffer[SOUND_COUNT];
 
 typedef struct
 {
@@ -110,14 +110,40 @@ static void init_sound_data()
         callback_data[i].audio_pos = audio8_data_len[i];
     }
 }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-function"
+
+static int send_sound_data(SoundDevice *sd, int length){
+    const int64_t now = get_hr_time();
+    const int64_t diff = now - sd->frame_start_time;
+    int samples_count = SAMPLES_PER_MICRO * diff;
+    return samples_count + length;
+}
+
+#pragma GCC diagnostic pop
+
 
 static void dump_sound(SoundDevice *sd, int samples_pos, int sound)
 {
-    sd->buffer_start_pos = samples_pos+sound;
-    // const int16_t *eob = sd->buffer + OUTPUT_BUFFER_SIZE;
-    // int pos = (sd->buffer_start_pos + samples_pos) % (OUTPUT_BUFFER_SIZE - 1);
-    // int  sound_len = audio8_data_len[sound];
+    const int sound_len = audio8_data_len[sound];
+    const int linear_end_pos = sd->buffer_start_pos + samples_pos + sound_len;
+    const uint16_t *source = audio16_buffer[sound];
+    const int to_write = linear_end_pos > OUTPUT_BUFFER_SIZE ? OUTPUT_BUFFER_SIZE - sd->buffer_start_pos : sound_len;
+    uint16_t *pos = sd->buffer + sd->buffer_start_pos;
 
+    while (pos < sd->buffer + sd->buffer_start_pos + to_write)
+    {
+        *pos = 0;
+        *(pos++) += *(source++);
+    }
+
+    const int left_to_write = sound_len - to_write;
+    for (pos = sd->buffer; pos < sd->buffer + left_to_write; pos++)
+    {
+        *pos = 0;
+        *pos += *(source++);
+    }
 }
 
 static void port_write(PortDevice *device, int port, int v)

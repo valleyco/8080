@@ -45,7 +45,7 @@ invaders_glade.h: invaders.glade
 
 $(DEPDIR): ; @mkdir -p $@
 
-EMU_LIBS += ../../emu-machine/libemu-machine-$(LIBS_NAME_SUFFIX).a
+EMU_LIBS = ../../emu-machine/libemu-machine-$(LIBS_NAME_SUFFIX).a
 EMU_LIBS += ../../cpu-8080/libemu-cpu-8080-$(LIBS_NAME_SUFFIX).a
 
 $(TARGET): ../rom/invaders.rom.h invaders_glade.h $(EMU_LIBS) $(OBJS)
