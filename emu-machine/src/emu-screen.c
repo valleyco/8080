@@ -56,7 +56,7 @@ static void update_buffer(const u_int8_t *emu_buffer, u_int32_t *screen_buffer)
     {
         for (int b = 1; b & 0xff; b <<= 1)
         {
-            *(screen_buffer++) = (*p_image & b) ? 0xFFFFFFFF : 0;
+            *(screen_buffer++) = (*p_image & b) ? 0xFFFFFFFF : 0xFF000000;
         }
     }
 }

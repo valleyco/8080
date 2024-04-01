@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#! python
 import sys
 import os
 import traceback

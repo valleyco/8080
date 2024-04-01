@@ -57,7 +57,7 @@ static void color_rect(u_int32_t *pixbuf_pixels, int x, int y, int w, int h, u_i
     {
         for (u_int32_t *pos = start; pos < (start + w); pos++)
         {
-           (*pos) &= color;
+           *pos &= color;
         }
         start += SCREEN_HEIGHT;
     };

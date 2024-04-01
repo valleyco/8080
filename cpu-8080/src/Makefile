@@ -7,21 +7,10 @@ CC = gcc
 
 LIBRARY = emu-cpu-8080
 
-NAME_SUFFIX= $(shell uname -m)-$(shell uname -s | tr [:upper:] [:lower:])
 
-NAME    :=  lib$(LIBRARY)-$(NAME_SUFFIX)
+NAME    :=  lib$(LIBRARY)$(LIBS_NAME_SUFFIX)
 SNAME   :=  ../$(NAME).a
 DNAME   :=  ../$(NAME).so
-
-CFLAGS  := -fpic -Wall -Werror -Wextra  -Walloca \
-		-fno-sanitize-recover=all -fsanitize=float-divide-by-zero \
-		-fsanitize=float-cast-overflow -fno-sanitize=null -fno-sanitize=alignment -c
-
-ifeq ($(CC), gcc)
-  CFLAGS += -std=gnu17 -Walloc-zero -fsanitize=undefined 
-else
-  CFLAGS += -O3 
-endif
 
 LDFLAGS :=  -L.
 
@@ -34,8 +23,6 @@ DEPDIR = .deps
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
 all: $(SNAME) $(DNAME) test
-
-LDLIBS = -lubsan
 
 %.o: %.c
 %.o: %.c $(DEPDIR)/%.d | $(DEPDIR)

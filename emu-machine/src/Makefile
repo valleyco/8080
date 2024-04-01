@@ -5,27 +5,13 @@ CC = gcc
 
 LIBRARY = emu-machine
 
-LIBS_NAME_SUFFIX= $(shell uname -m)-$(shell uname -s | tr [:upper:] [:lower:])
-
-NAME    :=  lib$(LIBRARY)-$(LIBS_NAME_SUFFIX)
+NAME    :=  lib$(LIBRARY)$(LIBS_NAME_SUFFIX)
 
 TARGET   :=  ../$(NAME).a
 
-CFLAGS  := -fpic -Wall -Werror -Wextra -Walloca \
-		-fno-sanitize-recover=all -fsanitize=float-divide-by-zero \
-		-fsanitize=float-cast-overflow -fno-sanitize=null -fno-sanitize=alignment \
-		-I../wav/ -c \
-		-I../../cpu-8080/src/ -c
-
-ifeq ($(CC), gcc)
-  CFLAGS += -std=gnu17 -fsanitize=undefined 
-else ifeq ($(CC), clang)
-  CFLAGS += -O3 
-endif
+override CFLAGS += -I../wav/ -I../../cpu-8080/src/ 
 
 LIBS :=
-
-LDLIBS =
 
 LDFLAGS :=  -L.
 
