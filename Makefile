@@ -1,4 +1,4 @@
-SUBDIRS := cpu-8080 emu-machine invaders 
+SUBDIRS := cpu-8080 emu-machine invaders console
 
 .PHONY: $(TOPTARGETS) $(SUBDIRS)
 

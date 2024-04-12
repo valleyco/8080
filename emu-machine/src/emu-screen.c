@@ -4,7 +4,7 @@
 #include "emu.h"
 #include "emu-screen.h"
 
-static void update_buffer(const u_int8_t *emu_buffer, u_int32_t *screen_buffer);
+static void update_buffer(const uint8_t *emu_buffer, uint32_t *screen_buffer);
 
 static void screen_tick(PortDevice *device)
 {
@@ -32,7 +32,7 @@ static void emu_screen_done(PortDevice *device)
     free(device);
 }
 
-PortDevice *emu_screen_init(int *intr, u_int8_t *emu_buffer, u_int32_t *screen_buffer, UpdateFn fn, void *user_data)
+PortDevice *emu_screen_init(int *intr, uint8_t *emu_buffer, uint32_t *screen_buffer, UpdateFn fn, void *user_data)
 {
     PortDevice *device = malloc(sizeof(PortDevice));
     memset(device, 0, sizeof(PortDevice));
@@ -50,9 +50,9 @@ PortDevice *emu_screen_init(int *intr, u_int8_t *emu_buffer, u_int32_t *screen_b
 }
 
 
-static void update_buffer(const u_int8_t *emu_buffer, u_int32_t *screen_buffer)
+static void update_buffer(const uint8_t *emu_buffer, uint32_t *screen_buffer)
 {
-    for (const u_int8_t *p_image = emu_buffer; p_image < (emu_buffer + SCREEN_HEIGHT * SCREEN_WIDTH / 8); p_image++)
+    for (const uint8_t *p_image = emu_buffer; p_image < (emu_buffer + SCREEN_HEIGHT * SCREEN_WIDTH / 8); p_image++)
     {
         for (int b = 1; b & 0xff; b <<= 1)
         {

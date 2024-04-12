@@ -16,8 +16,8 @@ Emulator *emu_new()
     emulator->context->port_write = (void (*)(void *, int, int))port_write;
     emulator->context->PC = 0;
     emulator->context->halt = 0;
-    emulator->context->address_mask = 0x3FFF;
-    emulator->context->rom_size = 0x2000;
+    emulator->context->address_mask = 0xFFFF;
+    emulator->context->rom_size = 0x0000;
     emulator->clock_ticks = 0;
 
     return emulator;
@@ -108,9 +108,15 @@ static inline bool handleIntr(Emulator *emulator)
 int emu_execute(Emulator *emulator, int clocks_ticks)
 {
     int ticks = 0;
-    while (ticks < clocks_ticks)
+    while (ticks < clocks_ticks && !emulator->context->halt)
     {
         int intrCycle = handleIntr(emulator);
+        // printf(
+        //     "PC=%04x SP=%04x (SP)=%04x\n",
+        //     emulator->context->PC,
+        //     emulator->context->SP,
+        //     emulator->context->memory[emulator->context->SP] +
+        //         (emulator->context->memory[emulator->context->SP + 1] << 8));
         int cycles = intrCycle ? intrCycle : emu_8080_execute(emulator->context);
         if (handleTicks(emulator, cycles))
         {

@@ -1,0 +1,4 @@
+*.bin
+*.lst
+diag
+*.s19

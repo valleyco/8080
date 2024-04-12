@@ -52,6 +52,8 @@ static Emulator *init_emulator(const Display *display)
     static const int emu_shifter_write_map[] = {2, 4};
     static const int emu_sound_write_map[] = {3, 5};
     Emulator *emulator = emu_new();
+    emulator->context->address_mask = 0x3FFF;
+    emulator->context->rom_size = 0x2000;
 
     emulator->key_event_device = emu_keyboard_init(&emulator->key_event_handler);
     emu_register_device(emulator, emulator->key_event_device, emu_keyboard_read_map, NULL);
