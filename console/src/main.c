@@ -6,11 +6,15 @@
 #include "s9-utils.h"
 
 void load_program(Emulator *emulator, const char *filename);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 void diag_put_char(char ch, void *data)
 {
     putchar(ch);
-    data = data;
 }
+#pragma GCC diagnostic pop
+
 
 int main(int argc, char *argv[])
 {

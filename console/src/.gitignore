@@ -2,3 +2,4 @@
 *.lst
 diag
 *.s19
+/console
